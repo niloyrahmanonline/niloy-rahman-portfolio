@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Check, ChevronsLeftRight, Film } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { ArrowUpRight, Camera, ChevronsLeftRight, Clapperboard, CodeXml, Film, Layers3 } from "lucide-react";
+import { useId, useRef, useState } from "react";
 import { profile, projects } from "@/lib/content";
 import styles from "./portfolio.module.css";
 
@@ -18,58 +18,94 @@ export function ProjectArt({ project, sizes = "(max-width: 760px) 90vw, 360px" }
   </div>;
 }
 
+type Study = {
+  key: string;
+  title: string;
+  category: "Development" | "Film" | "Photography" | "Digital";
+  description: string;
+  href: string;
+  image: string;
+};
+
+const thumbnails = {
+  interface: { image: "interface", description: "A modern and clean web interface concept." },
+  film: { image: "/images/selected-work/wedding-film-timeline.png", description: "A cinematic wedding video editing concept." },
+  portrait: { image: "photography", description: "A portrait photography and color grading study." },
+} as const;
+
+const studies: Study[] = [
+  ...projects.map((project) => ({
+    key: project.slug,
+    title: project.art === "portrait" ? "Portrait Photography" : project.title,
+    category: project.category,
+    href: "/portfolio/" + project.slug,
+    ...thumbnails[project.art],
+  })),
+  {
+    key: "digital-subscriptions",
+    title: "Digital Subscriptions",
+    category: "Digital",
+    href: "/digital-subscriptions",
+    image: "subscriptions",
+    description: "A service showcase for digital subscriptions.",
+  },
+];
+
+const categoryIcons = { Development: CodeXml, Film: Clapperboard, Photography: Camera, Digital: Layers3 };
+
 export function PortfolioGrid({ filterable = true }: { filterable?: boolean }) {
+  const SectionTitle = filterable ? "h1" : "h2";
   const ProjectHeading = filterable ? "h2" : "h3";
   const resultsId = useId();
-  const results = useRef<HTMLDivElement>(null);
+  const headingId = resultsId + "-heading";
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
-  const visible = filter === "All" ? projects : projects.filter((project) => project.category === filter);
+  const visible = filter === "All" ? studies : studies.filter((study) => study.category === filter);
 
-  useEffect(() => {
-    if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const observer = new IntersectionObserver((entries) => {
-      for (const { target, isIntersecting } of entries) {
-        if (!isIntersecting) continue;
-        target.setAttribute("data-revealed", "");
-        observer.unobserve(target);
-      }
-    }, { threshold: 0.15 });
-
-    results.current?.querySelectorAll("[data-project-card]:not([data-revealed])").forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
-  }, [filter]);
-
-  return <>
-    {filterable && <>
-      <div className="filters" role="group" aria-label="Filter projects">
-        {filters.map((item) => <button key={item} id={item === "All" ? resultsId + "-all" : undefined}
-          type="button" aria-pressed={item === filter} aria-controls={resultsId} onClick={() => setFilter(item)}>
-          <Check className="filter-check" size={14} aria-hidden="true" />{item}
-        </button>)}
-      </div>
-      <span className="sr-only" role="status">{visible.length} {visible.length === 1 ? "project" : "projects"} shown · {filter}</span>
-    </>}
-    <div className={styles.grid} id={resultsId} ref={results}>
-      {visible.length === 0 && <p className={styles.empty}>No projects in this category yet. <button type="button" onClick={() => {
-        document.getElementById(resultsId + "-all")?.focus();
-        setFilter("All");
-      }}>Show all projects</button></p>}
-      {visible.map((project) => {
-        const titleId = resultsId + "-" + project.slug;
-        return <Link className={styles.card} key={project.slug} href={"/portfolio/" + project.slug}
-          aria-labelledby={titleId} data-project-card>
-          <div className={styles.visual}><ProjectArt project={project} sizes="(max-width: 760px) 92vw, (max-width: 1300px) 53vw, 680px" /></div>
-          <div className={styles.copy}>
-            <p className="eyebrow">{project.category} · Concept</p>
-            <ProjectHeading id={titleId}>{project.title}</ProjectHeading>
-            <p className={styles.summary}>{project.description}</p>
-            <span className={styles.action}>View project <ArrowUpRight size={17} aria-hidden="true" /></span>
-          </div>
-        </Link>;
-      })}
+  return <section className={`${styles.showcase} ${filterable ? "" : styles.embedded}`} aria-labelledby={headingId}>
+    <div className={styles.decor} aria-hidden="true">
+      <span className={styles.butterfly}><i /><i /></span>
+      <span className={styles.butterfly}><i /><i /></span>
     </div>
-  </>;
+    <div className={styles.container}>
+      <header className={styles.heading}>
+        <div>
+          <p className={styles.eyebrow}>Portfolio</p>
+          <SectionTitle id={headingId}>Selected <span>Work.</span></SectionTitle>
+          <p className={styles.description}>A selection of creative experiments and concept studies.</p>
+        </div>
+        {filterable && <div className={styles.filters} role="group" aria-label="Filter selected work">
+          {filters.map((item) => {
+            const Icon = item === "All" ? null : categoryIcons[item];
+            return <button key={item} type="button" aria-pressed={item === filter} aria-controls={resultsId}
+              onClick={() => setFilter(item)}>{Icon && <Icon size={18} aria-hidden="true" />}{item}</button>;
+          })}
+        </div>}
+      </header>
+      {filterable && <p className="sr-only" role="status" aria-atomic="true">
+        {filter === "All" ? "3 concept studies and 1 service showcase shown." : `${visible.length} ${filter.toLowerCase()} concept ${visible.length === 1 ? "study" : "studies"} shown.`}
+      </p>}
+      <div className={styles.grid} id={resultsId}>
+        {visible.map((study) => {
+          const titleId = resultsId + "-" + study.key;
+          const Icon = categoryIcons[study.category];
+          return <Link className={styles.card} key={study.key} href={study.href}
+            aria-labelledby={titleId} data-project-card>
+            <div className={styles.visual}>
+              <Image src={study.image.startsWith("/") ? study.image : `/images/selected-work/${study.image}.webp`} alt="" fill
+                sizes="(max-width: 620px) 92vw, (max-width: 1000px) 44vw, (max-width: 1500px) 28vw, 400px" />
+            </div>
+            <div className={styles.copy}>
+              <p className={styles.badge}><Icon size={16} aria-hidden="true" />{study.category}</p>
+              <ProjectHeading id={titleId}>{study.title}</ProjectHeading>
+              <p className={styles.summary}>{study.description}</p>
+              <span className={styles.action}>{study.category === "Digital" ? "View service" : "View project"} <ArrowUpRight size={16} aria-hidden="true" /></span>
+            </div>
+          </Link>;
+        })}
+      </div>
+      {!filterable && <Link className={styles.browse} href="/portfolio">Browse portfolio <ArrowUpRight size={16} aria-hidden="true" /></Link>}
+    </div>
+  </section>;
 }
 
 

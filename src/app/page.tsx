@@ -8,11 +8,7 @@ export default function Home() {
   return <>
     <Hero />
     <section className="wrap section"><SectionHeading label="Services" title="What I do." /><ServiceGrid /></section>
-    <section className="wrap section" aria-label="Selected work">
-      <SectionHeading label="Portfolio" title="Selected work." description="Concept studies in interface design, wedding film editing, and portrait color." />
-      <PortfolioGrid filterable={false} />
-      <Link className="text-link" href="/portfolio">Browse portfolio</Link>
-    </section>
+    <PortfolioGrid filterable={false} />
     <section className="wrap section media-grid">
       <div id="showreel" className="showreel-section"><SectionHeading label="Film" title="Wedding films." /><Showreel /></div>
       <div><SectionHeading label="Photo editing" title="A study in color." /><PhotoComparison /></div>
