@@ -1,0 +1,166 @@
+.grid {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: stretch;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid light-dark(#d3c3e0, #554264);
+  border-radius: var(--surface-radius);
+  background: light-dark(#f6effa, #1e162a);
+  box-shadow: 0 18px 44px light-dark(rgb(81 49 109 / .12), rgb(4 1 9 / .32));
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.visual {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  background: #26182f;
+}
+
+.visual > :global(.project-art) {
+  min-height: clamp(17rem, 32vw, 28rem);
+  aspect-ratio: auto;
+}
+
+.visual > :global(.art-interface) {
+  background: radial-gradient(ellipse at 60% 65%, #7250a4, #2d2045 65%, #201830);
+}
+
+.visual::after {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(239 210 255 / .24);
+  background: linear-gradient(145deg, rgb(231 199 255 / .18), transparent 34%),
+    linear-gradient(0deg, rgb(30 13 45 / .36), transparent 48%);
+  content: "";
+  pointer-events: none;
+}
+
+.copy {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  min-width: 0;
+  padding: clamp(1.35rem, 4vw, 3.5rem);
+  background: radial-gradient(ellipse at top right,
+    light-dark(rgb(172 119 226 / .18), rgb(170 108 215 / .2)), transparent 72%);
+}
+
+.copy :is(h2, h3) {
+  margin-block: .65rem .75rem;
+  max-width: 16ch;
+  font-size: clamp(1.8rem, 4.25vw, 3.8rem);
+  line-height: 1.02;
+  font-weight: 650;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+
+.summary {
+  max-width: 38ch;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  margin-top: 1.35rem;
+  padding: .6rem .85rem;
+  border: 1px solid light-dark(#c9afd9, #655073);
+  border-radius: 999px;
+  background: light-dark(rgb(255 255 255 / .5), rgb(221 186 255 / .08));
+  color: var(--accent-text);
+  font-size: .875rem;
+  font-weight: 650;
+}
+
+.card:is(:hover, :focus-visible) {
+  border-color: var(--accent);
+}
+
+.card:is(:hover, :focus-visible) .action {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 4px;
+}
+
+.empty {
+  padding: 1.25rem;
+  color: var(--muted);
+}
+
+.empty button {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+@media (min-width: 761px) {
+  .card:nth-of-type(even) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+
+  .card:nth-of-type(even) .visual {
+    grid-area: 1 / 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .visual > :global(.project-art) {
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card[data-revealed]:not(:focus-within) {
+    animation: reveal .55s cubic-bezier(.22, .78, .29, 1) backwards;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card {
+      transition: transform .32s ease, border-color .24s ease;
+    }
+
+    .visual > :global(.project-art) {
+      transition: scale .55s cubic-bezier(.22, .78, .29, 1);
+    }
+
+    .card:hover {
+      transform: perspective(1000px) translateY(-4px) rotateX(1deg);
+    }
+
+    .card:hover .visual > :global(.project-art) {
+      scale: 1.035;
+    }
+  }
+}
+
+@keyframes reveal {
+  from { opacity: .68; translate: 0 .875rem; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@media (forced-colors: active) {
+  .card:focus-visible { outline-color: Highlight; }
+}
+
