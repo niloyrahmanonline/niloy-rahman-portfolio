@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { Hero } from "@/components/hero";
-import { Catalog, SectionHeading, ServiceGrid, Showreel } from "@/components/sections";
+import { Catalog, SectionHeading, Showreel } from "@/components/sections";
 import { PhotoComparison, PortfolioGrid } from "@/components/portfolio";
+import { ServicesOverview } from "@/components/service-showcases";
 import { profile } from "@/lib/content";
 
 export default function Home() {
   return <>
     <Hero />
-    <section className="wrap section"><SectionHeading label="Services" title="What I do." /><ServiceGrid /></section>
+    <ServicesOverview embedded />
     <PortfolioGrid filterable={false} />
     <section className="wrap section media-grid">
       <div id="showreel" className="showreel-section"><SectionHeading label="Film" title="Wedding films." /><Showreel /></div>

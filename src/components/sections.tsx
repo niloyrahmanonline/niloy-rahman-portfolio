@@ -1,7 +1,5 @@
-import Link from "next/link";
-import { ServiceVisual } from "./service-visual";
 import { Camera, Clapperboard, Code2, Film, ImageIcon, Layers3, Mail, MessageCircle, Phone } from "lucide-react";
-import { profile, services, showreel, subscriptions } from "@/lib/content";
+import { profile, showreel, subscriptions } from "@/lib/content";
 
 const icons = { camera: Camera, code: Code2, film: Film, image: ImageIcon, layers: Layers3 };
 
@@ -11,16 +9,6 @@ export function SectionHeading({ label, title, description }: { label: string; t
 
 export function PageHeading({ label, title, description }: { label: string; title: string; description: string }) {
   return <div className="page-heading"><p className="eyebrow">{label}</p><h1>{title}</h1><p>{description}</p></div>;
-}
-
-export function ServiceGrid() {
-  return <div className="service-grid">{services.map(({ icon, slug, name, tool, description }) => {
-    const Icon = icons[icon];
-    return <Link key={slug} href={"/services/" + slug} className={"panel service-card service-" + icon} data-glass-reflection>
-      <span className="tile-icon"><Icon size={21} /></span>
-      <div className="service-copy"><p className="card-meta">{tool}</p><h3>{name}</h3><p>{description}</p><span className="service-action">View service</span></div><ServiceVisual kind={icon} /><span className="glass-reflection" aria-hidden="true"><span /></span>
-    </Link>;
-  })}</div>;
 }
 
 export function Catalog() {
