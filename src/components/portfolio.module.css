@@ -208,6 +208,8 @@
 }
 @media (max-width: 1000px) {
   .card { grid-template-columns: minmax(0, 1fr); gap: .65rem; }
+  /* Give WebKit a definite inline size for the aspect-ratio box. */
+  .visual { width: 100%; }
   .copy { padding: .2rem .35rem .35rem; }
   .summary { max-width: 34ch; }
 }
