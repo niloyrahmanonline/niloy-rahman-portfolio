@@ -22,7 +22,7 @@ export function HeroGalaxy() {
   return <div className="hero-atmosphere" aria-hidden="true">
     <div className="hero-air">
       <i className="galaxy-cloud" />
-      <i className="galaxy-rays" />
+      <i className="galaxy-wave" />
       <i className="galaxy-stars" style={{ boxShadow: stars }} />
       <i className="galaxy-dust" style={{ boxShadow: dust }} />
       <i className="galaxy-bokeh" />

@@ -230,7 +230,7 @@ body { background: radial-gradient(ellipse at 75% 2%, var(--atmosphere), transpa
   48% { transform: translate3d(10px, -10px, 0); opacity: .70; }
   76% { transform: translate3d(2px, -2px, 0); opacity: .60; }
 }
-.galaxy-cloud, .galaxy-rays {
+.galaxy-cloud {
   mask-image: radial-gradient(ellipse farthest-side, #000 54%, transparent 100%);
 }
 .galaxy-cloud {
@@ -239,16 +239,18 @@ body { background: radial-gradient(ellipse at 75% 2%, var(--atmosphere), transpa
     url("/images/nebula-field.webp") center / cover no-repeat,
     radial-gradient(ellipse at 61% 55%, light-dark(#d4aaf72a, #9238f33a), transparent 53%),
     radial-gradient(ellipse at 29% 76%, light-dark(#e3adfc22, #812cd13f), transparent 48%);
-  animation: hero-fog 38s ease-in-out infinite paused;
+  animation: hero-fog 21s ease-in-out infinite paused;
 }
-.galaxy-rays {
-  inset: 1% -8% -5%;
+.galaxy-wave {
+  inset: 12% 0 10%;
   background:
-    radial-gradient(ellipse at 75% 12%, light-dark(#eecff387, #e670f341), transparent 44%),
-    linear-gradient(137deg, transparent 37%, rgb(186 99 250 / .16) 47%, transparent 54% 68%, rgb(88 158 247 / .078) 72%, transparent 81%),
-    radial-gradient(ellipse at 53% 79%, light-dark(#e9c4ff77, #a854fd2b), transparent 51%);
-  animation: hero-light 44s ease-in-out infinite paused;
+    url("/images/energy-wave.webp") center / 100% 100% no-repeat,
+    radial-gradient(ellipse 27% 29% at 70% 32%, light-dark(#eecff37a, #e670f332), transparent),
+    radial-gradient(ellipse 37% 23% at 54% 69%, light-dark(#e9c4ff67, #a854fd26), transparent);
+  opacity: .74;
+  animation: galaxy-surge 17s ease-in-out infinite paused;
 }
+.hero-atmosphere[data-quality="balanced"] .galaxy-wave { opacity: .61; }
 .galaxy-stars, .galaxy-dust {
   left: 50%; top: min(50%, 51svh); width: 1px; height: 1px; border-radius: 50%;
 }
@@ -266,12 +268,14 @@ body { background: radial-gradient(ellipse at 75% 2%, var(--atmosphere), transpa
 }
 .cinematic-hero[data-atmosphere="playing"] .hero-air i { animation-play-state: running; }
 @keyframes hero-fog {
-  0%, 100% { transform: translate3d(-5%, 2%, 0) rotate(-5deg) scale(1.035); opacity: .73; }
-  50% { transform: translate3d(6%, -4%, 0) rotate(8deg) scale(1.15); opacity: .94; }
+  0%, 100% { transform: translate3d(-9%, 4%, 0) rotate(-9deg) scale(1.08); opacity: .66; }
+  48% { transform: translate3d(11%, -7%, 0) rotate(11deg) scale(1.19); opacity: .96; }
+  76% { transform: translate3d(3%, -3%, 0) rotate(5deg) scale(1.13); opacity: .83; }
 }
-@keyframes hero-light {
-  0%, 100% { transform: translate3d(3%, -4%, 0); opacity: .47; }
-  50% { transform: translate3d(-4%, 3%, 0); opacity: .81; }
+@keyframes galaxy-surge {
+  0%, 100% { transform: translate3d(-10%, 5%, 0) rotate(-15deg) scale(1.03); }
+  43% { transform: translate3d(10%, -4%, 0) rotate(-7deg) scale(1.16); }
+  74% { transform: translate3d(1%, -1%, 0) rotate(-10deg) scale(1.09); }
 }
 @keyframes hero-stars {
   0%, 100% { transform: translate3d(-4px, 5px, 0); opacity: .45; }

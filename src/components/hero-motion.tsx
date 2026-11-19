@@ -54,6 +54,7 @@ export function HeroMotion({ children }: { children: ReactNode }) {
       if (renderer) depth.dataset.rendered = "true";
       if ((galaxy || butterflies) && atmosphere) {
         const area = atmosphere.getBoundingClientRect();
+        atmosphere.dataset.quality = balanced || area.width < 768 || navigator.hardwareConcurrency <= 4 ? "balanced" : "full";
         galaxy?.resize(area.width, area.height, balanced);
         galaxy?.draw(reduced.matches ? 0 : elapsed, pointer);
         if (galaxy) atmosphere.dataset.rendered = "true";
@@ -175,6 +176,7 @@ export function HeroMotion({ children }: { children: ReactNode }) {
       atmosphere?.style.removeProperty("--atmo-x");
       atmosphere?.style.removeProperty("--atmo-y");
       if (atmosphere) delete atmosphere.dataset.rendered;
+      if (atmosphere) delete atmosphere.dataset.quality;
     };
   }, []);
 

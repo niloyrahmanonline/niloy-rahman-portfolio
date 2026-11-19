@@ -1,14 +1,16 @@
 type Offset = { x: number; y: number };
 type Rect = { left: number; top: number; right: number; bottom: number };
 type Flight = readonly [x: number, y: number, spanX: number, spanY: number, seconds: number, phase: number, direction: number, size: number];
+type Placement = readonly [x: number, y: number, spanX: number, spanY: number, size: number];
 const TAU = Math.PI * 2;
+const SIDES = [-1, 1] as const;
 
 // The longer lanes pass beyond the frame at both ends; the others bank back in the galaxy.
-const desktop: readonly Flight[] = [
-  [.39, .167, .13, .032, 15, -.22, 1, 88],
-  [.72, .174, .12, .042, 17, -.21, -1, 92],
-  [.86, .445, .11, .08, 19, .28, 1, 78],
-  [.15, .755, .14, .075, 17, .70, -1, 53],
+const flights: readonly Flight[] = [
+  [.39, .172, .13, .029, 15, -.22, 1, 96],
+  [.72, .174, .12, .039, 17, -.21, -1, 100],
+  [.86, .451, .11, .074, 19, .28, 1, 84],
+  [.15, .755, .14, .075, 17, .70, -1, 59],
   [.32, .48, .18, .070, 15, -.40, 1, 49],
   [.88, .92, .15, .055, 19, .90, -1, 52],
   [.55, .12, .62, .039, 25, -1.09, 1, 27],
@@ -17,11 +19,18 @@ const desktop: readonly Flight[] = [
   [.98, .55, .20, .13, 23, -1.04, 1, 27],
   [.62, .14, .28, .047, 21, .78, 1, 31],
 ];
-const mobile: readonly Flight[] = [
-  [.18, .295, .15, .075, 15, -.24, 1, 49],
-  [.84, .31, .12, .079, 17, .19, -1, 54],
-  [.20, .47, .18, .047, 18, -.48, -1, 37],
-  [.87, .46, .15, .065, 20, .36, 1, 36],
+// The same creatures keep their phase, pace and direction as their lanes reflow.
+const narrowPlacements: readonly Placement[] = [
+  [.18, .30, .13, .046, 54],
+  [.84, .34, .105, .049, 57],
+  [.17, .405, .13, .049, 44],
+  [.86, .443, .11, .041, 42],
+];
+const tabletPlacements: readonly Placement[] = [
+  [.53, .183, .11, .024, 72],
+  [.90, .153, .085, .018, 65],
+  [.92, .432, .055, .062, 61],
+  [.18, .91, .12, .047, 49],
 ];
 const palettes = [
   { highlight: "#e4fdff", edge: "#91d9ff", mid: "#6280ec", bloom: "#528eff" },
@@ -115,7 +124,8 @@ export function createEnergyButterflies(canvas: HTMLCanvasElement) {
 
   let width = 0, height = 0, compact = false, mobileLayout = false;
   let avoid: readonly Rect[] = [];
-  const dirty = new Float32Array(desktop.length * 4 * 4);
+  const routes: Flight[] = [];
+  const dirty = new Float32Array(flights.length * 4 * 4);
   let dirtyCount = 0;
   const sample = { x: 0, y: 0, bank: 0, depth: 0 };
 
@@ -137,7 +147,7 @@ export function createEnergyButterflies(canvas: HTMLCanvasElement) {
       const dy = Math.max(rect.top - y, 0, y - rect.bottom);
       available = Math.min(available, Math.hypot(dx, dy));
     }
-    const fade = Math.max(0, Math.min(1, (available - padding) / 23));
+    const fade = Math.max(0, Math.min(1, (available - padding * .89) / 19));
     return fade * fade * (3 - 2 * fade);
   }
 
@@ -157,6 +167,18 @@ export function createEnergyButterflies(canvas: HTMLCanvasElement) {
       height = nextHeight;
       compact = nextCompact;
       mobileLayout = width < 768;
+      const mix = mobileLayout ? Math.max(0, (width - 570) / 198) : Math.max(0, Math.min(1, (width - 800) / 360));
+      // Layout clearance changes before density does. Timing stays independent of width.
+      for (const [index, flight] of flights.entries()) {
+        const placement = (mobileLayout ? narrowPlacements : tabletPlacements)[index];
+        if (!placement) { routes[index] = flight; continue; }
+        const blend = (compactValue: number, wideValue: number) => compactValue + (wideValue - compactValue) * mix;
+        routes[index] = [
+          blend(placement[0], flight[0]), blend(placement[1], flight[1]),
+          blend(placement[2], flight[2]), blend(placement[3], flight[3]),
+          flight[4], flight[5], flight[6], blend(placement[4], flight[7]),
+        ];
+      }
       const ratio = Math.min(window.devicePixelRatio || 1, compact ? .78 : 1, Math.sqrt((compact ? 370_000 : 760_000) / (width * height)));
       canvas.width = Math.max(1, Math.round(width * ratio));
       canvas.height = Math.max(1, Math.round(height * ratio));
@@ -168,13 +190,12 @@ export function createEnergyButterflies(canvas: HTMLCanvasElement) {
       for (let i = 0; i < dirtyCount; i += 4) ink.clearRect(dirty[i], dirty[i + 1], dirty[i + 2], dirty[i + 3]);
       dirtyCount = 0;
 
-      const routes = mobileLayout ? mobile : desktop;
       const count = mobileLayout ? (still ? 3 : 4) : still ? 5 : compact ? 8 : routes.length;
       for (let i = count - 1; i >= 0; i--) {
         const route = routes[i];
         const sprite = atlas[i % atlas.length];
-        const scale = Math.min(1.15, Math.max(.78, width / 1440));
-        const size = route[7] * (mobileLayout ? 1 : scale);
+        const scale = Math.max(.94, Math.min(1.14, width / 1440));
+        const size = route[7] * scale;
 
         const particles = still ? 0 : compact ? 1 : i < 5 ? 3 : 1;
         for (let trail = particles; trail > 0; trail--) {
@@ -196,14 +217,14 @@ export function createEnergyButterflies(canvas: HTMLCanvasElement) {
         const alpha = visibility(x, y, radius) * (.63 + depth * .31);
         if (alpha < .025) continue;
 
-        const beat = time * TAU * (2.2 + i % 5 * .21) + i * 1.7;
-        const hinge = still ? .44 : .22 + (.5 - Math.cos(beat) * .5) * 1.03;
+        const beat = time * TAU * (1.72 + i % 5 * .19) + i * 1.7;
+        const hinge = still ? .36 : .13 + (.5 - Math.cos(beat) * .5) * 1.18;
         const yaw = bank * .62;
         ink.globalAlpha = alpha;
         ink.save();
         ink.translate(x, y);
         ink.rotate(bank);
-        for (const side of [-1, 1]) {
+        for (const side of SIDES) {
           const spread = Math.max(.14, Math.cos(hinge + side * yaw));
           ink.save();
           ink.transform(side * spread, Math.sin(hinge) * (.10 + side * bank * .17), 0, 1, 0, 0);
